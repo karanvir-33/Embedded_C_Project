@@ -24,13 +24,13 @@ int main()
 	lj_cue = Go();
 	
 	// Program Explanation to User 
-    printf("Welcome to the Temperature Monitoring Program!\n\n");
-    printf("This program will monitor the temperature using a sensor connected to the LabJack device.\n");
-    printf("It will alert you with a buzzer and a blue LED when the temperature exceeds a threshold that you set.\n");
-    printf("The LED will turn on when the temperature is below the threshold and turn off when the temperature exceeds the threshold.\n");
-    printf("The buzzer will turn on when the temperature exceeds the threshold, and turn off when it goes back below.\n");
-    printf("You can choose to run the program for a specified time or until the buzzer has been activated a certain number of times.\n");
-    printf("After the exit condition is met, the program will stop and both the buzzer and LED will be turned off.\n\n");
+    	printf("Welcome to the Temperature Monitoring Program!\n\n");
+    	printf("This program will monitor the temperature using a sensor connected to the LabJack device.\n");
+    	printf("It will alert you with a buzzer and a blue LED when the temperature exceeds a threshold that you set.\n");
+    	printf("The LED will turn on when the temperature is below the threshold and turn off when the temperature exceeds the threshold.\n");
+    	printf("The buzzer will turn on when the temperature exceeds the threshold, and turn off when it goes back below.\n");
+    	printf("You can choose to run the program for a specified time or until the buzzer has been activated a certain number of times.\n");
+    	printf("After the exit condition is met, the program will stop and both the buzzer and LED will be turned off.\n\n");
 	
 	printf("Please enter the threshold temperature in degrees Celsius for the buzzer to sound: ");
 	scanf(" %lf", &thresTemp);
@@ -86,54 +86,54 @@ int main()
 				}
 				break;
 		 case 'B':
-					// Buzzer activation-based exit strategy
-            		printf("How many times would you like the buzzer to activate?\n");
-            		scanf("%d", &buzzerActivations);
+				// Buzzer activation-based exit strategy
+            			printf("How many times would you like the buzzer to activate?\n");
+            			scanf("%d", &buzzerActivations);
 		
-					while (buzzerActivations > 0) 
+				while (buzzerActivations > 0) 
+				{
+                			lj_cue = AddRequest(lj_handle, LJ_ioGET_AIN, 0, 0, 0, 0);  // Get temperature reading from AIN0
+               				lj_cue = Go();
+                			lj_cue = GetResult(lj_handle, LJ_ioGET_AIN, 0, &tempAIN0);
+
+                			// Display the current temperature
+                			printf("The current temperature is %.2f degrees Celsius.\n", (tempAIN0 * 100));
+
+                			// Temperature below threshold
+                			if ((tempAIN0 * 100 ) < thresTemp) 
 					{
-                		lj_cue = AddRequest(lj_handle, LJ_ioGET_AIN, 0, 0, 0, 0);  // Get temperature reading from AIN0
-               			lj_cue = Go();
-                		lj_cue = GetResult(lj_handle, LJ_ioGET_AIN, 0, &tempAIN0);
-
-                		// Display the current temperature
-                		printf("The current temperature is %.2f degrees Celsius.\n", (tempAIN0 * 100));
-
-                		// Temperature below threshold
-                		if ((tempAIN0 * 100 ) < thresTemp) 
+                    				if (buzzerState == 1) 
 						{
-                    		if (buzzerState == 1) 
-							{
-                				// Turn buzzer off (if it's currently on due to sticky behavior)
-                				lj_cue = AddRequest(lj_handle, LJ_ioPUT_TIMER_VALUE, 0, 0, 0, 0);  // Buzzer off
-                				lj_cue = AddRequest(lj_handle, LJ_ioPUT_DAC, 1, 0, 0, 0);  // LED on
-                				lj_cue = Go();
-                				buzzerState = 0;  // Reset buzzer state to off
-                				printf("Buzzer turned off, temperature below threshold.\n");
-            				}
-                		} 
-                		// Temperature exceeds threshold
-                		else if ((tempAIN0 * 100 ) > thresTemp)
-				 		{
-                    		if (buzzerState == 0) 
-							{
-                				// Turn buzzer on (sticky behavior)
-                				lj_cue = AddRequest(lj_handle, LJ_ioPUT_TIMER_VALUE, 0, 32768, 0, 0);  // Buzzer on (50% duty cycle)
-                				lj_cue = AddRequest(lj_handle, LJ_ioPUT_DAC, 1, 5, 0, 0);  // LED off
-                				lj_cue = Go();
+                					// Turn buzzer off (if it's currently on due to sticky behavior)
+                					lj_cue = AddRequest(lj_handle, LJ_ioPUT_TIMER_VALUE, 0, 0, 0, 0);  // Buzzer off
+                					lj_cue = AddRequest(lj_handle, LJ_ioPUT_DAC, 1, 0, 0, 0);  // LED on
+                					lj_cue = Go();
+                					buzzerState = 0;  // Reset buzzer state to off
+                					printf("Buzzer turned off, temperature below threshold.\n");
+            					}
+                			} 
+                			// Temperature exceeds threshold
+                			else if ((tempAIN0 * 100 ) > thresTemp)
+				 	{
+                    				if (buzzerState == 0) 
+						{
+                					// Turn buzzer on (sticky behavior)
+                					lj_cue = AddRequest(lj_handle, LJ_ioPUT_TIMER_VALUE, 0, 32768, 0, 0);  // Buzzer on (50% duty cycle)
+                					lj_cue = AddRequest(lj_handle, LJ_ioPUT_DAC, 1, 5, 0, 0);  // LED off
+                					lj_cue = Go();
 
-                				buzzerState = 1;  // Set buzzer state to on (sticky)
+                					buzzerState = 1;  // Set buzzer state to on (sticky)
 
-                				printf("Temperature exceeded threshold. Buzzer activated!\n");
+                					printf("Temperature exceeded threshold. Buzzer activated!\n");
 
-								buzzerActivations--;  // Decrease the remaining buzzer activations
-							}
+							buzzerActivations--;  // Decrease the remaining buzzer activations
+						}
 
-                		}
+                			}
 
-                		// Sleep for 200 ms (5 updates per second)
-                		Sleep(200);
-            		}
+                			// Sleep for 200 ms (5 updates per second)
+                			Sleep(200);
+            			}
 
 				break;
 		 default:
